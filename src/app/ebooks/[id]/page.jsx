@@ -8,6 +8,7 @@ import { FaBook, FaUser, FaTag, FaDollarSign, FaHeart, FaShoppingCart, FaArrowLe
 import { useAuth } from '@/context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import stripePromise from '@/utils/stripe';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -46,25 +47,80 @@ export default function EbookDetails() {
     if (id) fetchEbook();
   }, [id, router]);
 
-  const handleBookmark = () => {
+  // ✅ Bookmark handler with real API call
+  const handleBookmark = async () => {
     if (!isAuthenticated) {
       toast.error('Please login to bookmark');
       router.push('/login');
       return;
     }
-    setIsBookmarked(!isBookmarked);
-    toast.success(isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks');
+
+    try {
+      const token = localStorage.getItem('token');
+
+      if (isBookmarked) {
+        // Remove bookmark
+        await axios.delete(`${API_URL}/users/bookmarks/${ebook._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setIsBookmarked(false);
+        toast.success('Removed from bookmarks');
+      } else {
+        // Add bookmark
+        await axios.post(
+          `${API_URL}/users/bookmarks/${ebook._id}`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setIsBookmarked(true);
+        toast.success('Added to bookmarks');
+      }
+    } catch (error) {
+      console.error('Bookmark error:', error);
+      toast.error('Failed to update bookmark');
+    }
   };
 
-  const handlePurchase = () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to purchase');
-      router.push('/login');
-      return;
+  // ✅ Purchase handler with Stripe integration
+  const handlePurchase = async () => {
+  if (!isAuthenticated) {
+    toast.error('Please login to purchase');
+    router.push('/login');
+    return;
+  }
+
+  if (!ebook.isAvailable) {
+    toast.error('This ebook is not available');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    
+    // Create checkout session
+    const response = await axios.post(
+      `${API_URL}/payments/create-checkout`,
+      { ebookId: ebook._id },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (response.data.success) {
+      // ✅ Redirect to Stripe Checkout URL
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        toast.error('Checkout URL not available');
+      }
     }
-    // TODO: Integrate Stripe payment
-    toast.success('Payment integration coming soon!');
-  };
+  } catch (error) {
+    console.error('Purchase error:', error);
+    toast.error(error.response?.data?.message || 'Payment failed');
+  }
+};
 
   if (loading) {
     return (
@@ -92,10 +148,7 @@ export default function EbookDetails() {
         <div className="text-center">
           <FaBook className="text-6xl text-gray-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Ebook not found</h2>
-          <Link
-            href="/browse"
-            className="text-violet-400 hover:text-violet-300"
-          >
+          <Link href="/browse" className="text-violet-400 hover:text-violet-300">
             ← Back to Browse
           </Link>
         </div>
