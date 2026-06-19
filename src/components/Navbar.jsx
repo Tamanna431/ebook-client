@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaBars, FaTimes, FaBookOpen } from 'react-icons/fa';
+import { FaBars, FaTimes, FaBookOpen, FaUserCircle } from 'react-icons/fa';
 import { navLinks } from '@/utils/constants';
+import { useAuth } from '@/context/AuthContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // পরে Auth থেকে আসবে
+  const { user, logout, isAuthenticated } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -44,18 +45,38 @@ const Navbar = () => {
 
           {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link
-              href="/login"
-              className="text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
-              className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-full font-medium text-sm hover:from-violet-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-violet-500/25"
-            >
-              Get Started
-            </Link>
+            {isAuthenticated ? (
+              <>
+                {/* ✅ User Name দেখানো */}
+                <div className="flex items-center space-x-2 text-gray-300">
+                  <FaUserCircle className="text-violet-400 text-lg" />
+                  <span className="text-sm font-medium">
+                    {user?.name || 'User'}
+                  </span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="px-6 py-2.5 border border-red-500 text-red-400 rounded-full font-medium text-sm hover:bg-red-500/10 transition-all duration-300"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-full font-medium text-sm hover:from-violet-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-violet-500/25"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,22 +110,43 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
-              <div className="pt-4 space-y-3 border-t border-gray-800">
-                <Link
-                  href="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="block text-center text-violet-400 hover:text-violet-300 font-medium py-2"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setIsOpen(false)}
-                  className="block text-center px-6 py-2.5 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-full font-medium"
-                >
-                  Get Started
-                </Link>
-              </div>
+              
+              {isAuthenticated ? (
+                <>
+                  <div className="flex items-center space-x-2 text-gray-300 py-2">
+                    <FaUserCircle className="text-violet-400" />
+                    <span className="text-sm font-medium">
+                      {user?.name || 'User'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsOpen(false);
+                    }}
+                    className="w-full text-center px-6 py-2.5 border border-red-500 text-red-400 rounded-full font-medium text-sm hover:bg-red-500/10 transition-all duration-300"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <div className="pt-4 space-y-3 border-t border-gray-800">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="block text-center text-violet-400 hover:text-violet-300 font-medium py-2"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setIsOpen(false)}
+                    className="block text-center px-6 py-2.5 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-full font-medium"
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

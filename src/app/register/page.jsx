@@ -6,12 +6,14 @@ import { useAuth } from '@/context/AuthContext';
 import { FaGoogle, FaBookOpen, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 const Register = () => {
-  const { register: registerUser, loading } = useAuth();
+  const { register: registerUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('user');
 
   const {
     register,
@@ -23,11 +25,12 @@ const Register = () => {
   const password = watch('password');
 
   const onSubmit = async (data) => {
-    setError('');
-    
+    setIsSubmitting(true);
+
     // Check if passwords match
     if (data.password !== data.confirmPassword) {
-      setError('Passwords do not match');
+      toast.error('Passwords do not match');
+      setIsSubmitting(false);
       return;
     }
 
@@ -36,15 +39,24 @@ const Register = () => {
       name: data.fullName,
       email: data.email,
       password: data.password,
-      role: data.role,
+      role: selectedRole,
     };
 
-    await registerUser(userData);
+    // Call register function from AuthContext
+    const result = await registerUser(userData);
+
+    // ✅ Login page এ ইমেইল পাঠিয়ে দিন (auto-fill করার জন্য)
+
+  
+    if (result && result.success) {
+      localStorage.setItem('registeredEmail', data.email);
+    }
+
+    setIsSubmitting(false);
   };
 
   const handleGoogleLogin = () => {
-    // Google OAuth will be implemented later
-    alert('Google login will be available soon!');
+    toast.success('Google login will be available soon!');
   };
 
   return (
@@ -81,6 +93,7 @@ const Register = () => {
               <input
                 id="fullName"
                 type="text"
+                autoComplete="name"
                 {...register('fullName', { required: 'Full name is required' })}
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors"
                 placeholder="John Doe"
@@ -98,6 +111,7 @@ const Register = () => {
               <input
                 id="email"
                 type="email"
+                autoComplete="email"
                 {...register('email', {
                   required: 'Email is required',
                   pattern: {
@@ -122,6 +136,7 @@ const Register = () => {
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   {...register('password', {
                     required: 'Password is required',
                     minLength: {
@@ -154,8 +169,11 @@ const Register = () => {
                 <input
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   {...register('confirmPassword', {
                     required: 'Please confirm your password',
+                    validate: (value) =>
+                      value === password || 'Passwords do not match',
                   })}
                   className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors"
                   placeholder="••••••••"
@@ -173,55 +191,59 @@ const Register = () => {
               )}
             </div>
 
-            {/* Role Selection */}
+            {/* Role Selection - Fixed with state */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 I want to join as a
               </label>
               <div className="grid grid-cols-2 gap-3">
-                <label className="relative flex items-center justify-center p-3 border border-gray-700 rounded-lg cursor-pointer hover:border-violet-500 transition-colors">
-                  <input
-                    type="radio"
-                    value="user"
-                    {...register('role', { required: 'Please select a role' })}
-                    className="sr-only peer"
-                  />
-                  <span className="text-sm text-gray-300 peer-checked:text-violet-400 peer-checked:border-violet-500">
-                    Reader
-                  </span>
-                </label>
-                <label className="relative flex items-center justify-center p-3 border border-gray-700 rounded-lg cursor-pointer hover:border-violet-500 transition-colors">
-                  <input
-                    type="radio"
-                    value="writer"
-                    {...register('role', { required: 'Please select a role' })}
-                    className="sr-only peer"
-                  />
-                  <span className="text-sm text-gray-300 peer-checked:text-violet-400 peer-checked:border-violet-500">
-                    Writer
-                  </span>
-                </label>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('user')}
+                  className={`relative flex flex-col items-center justify-center p-4 border rounded-lg transition-all duration-300 ${
+                    selectedRole === 'user'
+                      ? 'border-violet-500 bg-violet-500/10 text-violet-400'
+                      : 'border-gray-700 text-gray-300 hover:border-violet-500'
+                  }`}
+                >
+                  <FaBookOpen className="text-2xl mb-2" />
+                  <span className="text-sm font-medium">Reader</span>
+                  <span className="text-xs text-gray-500 mt-1">Browse & Buy</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('writer')}
+                  className={`relative flex flex-col items-center justify-center p-4 border rounded-lg transition-all duration-300 ${
+                    selectedRole === 'writer'
+                      ? 'border-violet-500 bg-violet-500/10 text-violet-400'
+                      : 'border-gray-700 text-gray-300 hover:border-violet-500'
+                  }`}
+                >
+                  <FaBookOpen className="text-2xl mb-2" />
+                  <span className="text-sm font-medium">Writer</span>
+                  <span className="text-xs text-gray-500 mt-1">Publish Ebooks</span>
+                </button>
               </div>
-              {errors.role && (
-                <p className="mt-1 text-sm text-red-500">{errors.role.message}</p>
-              )}
             </div>
           </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-900/20 border border-red-500 rounded-lg p-3 text-sm text-red-400">
-              {error}
-            </div>
-          )}
 
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-lg font-semibold hover:from-violet-700 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
+            className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-lg font-semibold hover:from-violet-700 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-violet-500/25"
           >
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {isSubmitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating Account...
+              </span>
+            ) : (
+              'Create Account'
+            )}
           </button>
 
           {/* Divider */}
