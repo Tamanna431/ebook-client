@@ -55,9 +55,14 @@ const Register = () => {
     setIsSubmitting(false);
   };
 
-  const handleGoogleLogin = () => {
-    toast.success('Google login will be available soon!');
-  };
+  //const handleGoogleLogin = () => {
+    //toast.success('Google login will be available soon!');
+   const handleGoogleLogin = () => {
+  // ✅ এভাবে লিখুন
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  window.location.href = `${apiUrl}/api/auth/google`;
+};
+  //};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 pt-24">

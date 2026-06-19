@@ -16,8 +16,9 @@ export const useAuth = () => {
 };
 
 // API Base URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+ 
+ // console.log('Google URL:', googleUrl);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,8 +26,10 @@ export const AuthProvider = ({ children }) => {
 
   // Setup axios defaults
   useEffect(() => {
-    axios.defaults.baseURL = API_URL;
-    
+   // axios.defaults.baseURL = API_URL;
+     axios.defaults.baseURL = `${API_URL}/api`; 
+     // console.log('API URL:', apiUrl);
+  
     // Check if user is logged in on mount
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');

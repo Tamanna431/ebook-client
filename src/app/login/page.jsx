@@ -33,11 +33,11 @@ const Login = () => {
     await login(data);
     setIsSubmitting(false);
   };
-
   const handleGoogleLogin = () => {
-    alert('Google login will be available soon!');
-  };
-
+  // ✅ এভাবে লিখুন
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  window.location.href = `${apiUrl}/api/auth/google`;
+};
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 pt-24">
       <motion.div
