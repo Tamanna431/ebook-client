@@ -3,11 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaBook, FaUsers, FaStar, FaArrowRight } from 'react-icons/fa';
-import axios from 'axios';
+import api from '@/lib/axios';  // ✅ axios এর বদলে api
 import Hero from '@/components/Hero';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function Home() {
   const [featuredEbooks, setFeaturedEbooks] = useState([]);
@@ -17,12 +14,12 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch latest 6 ebooks
-        const ebooksResponse = await axios.get(`${API_URL}/api/ebooks?limit=6`);
+        // ✅ api instance ব্যবহার করুন
+        const ebooksResponse = await api.get('/api/ebooks/featured');
         setFeaturedEbooks(ebooksResponse.data.data || []);
 
-        // Fetch top writers
-        const writersResponse = await axios.get(`${API_URL}/api/users/top-writers`);
+        // ✅ Top writers endpoint
+        const writersResponse = await api.get('/api/users/top-writers');
         setTopWriters(writersResponse.data.data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -47,7 +44,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
       <Hero />
 
       {/* Featured Ebooks Section */}
