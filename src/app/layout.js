@@ -2,6 +2,7 @@ import { Toaster } from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { AuthProvider } from '@/context/AuthContext';
+import ErrorBoundary from '@/components/ErrorBoundary'; // ✅ এই লাইনটি যোগ করুন
 import './globals.css';
 
 export const metadata = {
@@ -13,13 +14,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-gray-900 text-white antialiased">
-        <AuthProvider>
-          <Navbar />
-          <main className="min-h-screen">
-            {children}
-          </main>
-          <Footer />
-        </AuthProvider>
+        <ErrorBoundary> {/* ✅ এই wrapper টি যোগ করুন */}
+          <AuthProvider>
+            <Navbar />
+            <main className="min-h-screen">
+              {children}
+            </main>
+            <Footer />
+          </AuthProvider>
+        </ErrorBoundary> {/* ✅ এই wrapper টি বন্ধ করুন */}
+        
         <Toaster
           position="top-right"
           toastOptions={{

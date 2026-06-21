@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaSearch, FaFilter, FaSort, FaBook, FaSpinner } from 'react-icons/fa';
 import api from '@/lib/axios';
+import Loading from '@/components/Loading';
+import SkeletonCard from '@/components/SkeletonCard';
 
 const GENRES = ['All Genres', 'Fiction', 'Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Biography', 'Self-Help', 'Other'];
 const SORT_OPTIONS = [
@@ -221,9 +223,7 @@ function BrowseContent() {
         {/* Ebooks Grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(12)].map((_, i) => (
-              <div key={i} className="bg-gray-800 rounded-xl h-96 animate-pulse" />
-            ))}
+            <SkeletonCard count={12} />
           </div>
         ) : ebooks.length === 0 ? (
           <div className="text-center py-20">
@@ -320,7 +320,7 @@ export default function BrowsePage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-900 pt-24 flex items-center justify-center">
-        <FaSpinner className="animate-spin text-4xl text-violet-500" />
+        <Loading message="Loading ebooks..." />
       </div>
     }>
       <BrowseContent />
