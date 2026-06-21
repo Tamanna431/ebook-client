@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaSearch, FaFilter, FaSortAmountDown, FaBook, FaHeart } from 'react-icons/fa';
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const GENRES = ['Fiction', 'Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Biography', 'Self-Help', 'Other'];
 
@@ -42,7 +42,7 @@ export default function BrowseEbooks() {
       if (maxPrice) params.set('maxPrice', maxPrice);
       if (available) params.set('available', available);
 
-      const response = await axios.get(`${API_URL}/ebooks?${params.toString()}`);
+      const response = await axios.get(`${API_URL}/api/ebooks?${params.toString()}`);
       setEbooks(response.data.data || []);
       setPagination(response.data.pagination || { total: 0, page: 1, pages: 0 });
     } catch (error) {
@@ -276,7 +276,8 @@ export default function BrowseEbooks() {
                       <div className="absolute top-2 right-2 bg-violet-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                         ${ebook.price}
                       </div>
-                      {!ebook.isAvailable && (
+                      {/* ✅ Fixed: Use soldCount instead of isAvailable */}
+                      {ebook.soldCount > 100 && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                           <span className="text-white font-bold text-lg">Sold Out</span>
                         </div>

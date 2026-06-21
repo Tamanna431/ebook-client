@@ -1,11 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '@/lib/axios';  // ✅
 import { FaBook, FaCalendar, FaDollarSign, FaShoppingCart } from 'react-icons/fa';
 import Link from 'next/link';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function PurchaseHistory() {
   const [purchases, setPurchases] = useState([]);
@@ -14,10 +12,7 @@ export default function PurchaseHistory() {
   useEffect(() => {
     const fetchPurchases = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${API_URL}/users/me/purchases`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.get('/api/users/me/purchases');  // ✅
         setPurchases(response.data.data || []);
       } catch (error) {
         console.error('Error fetching purchases:', error);
@@ -29,17 +24,7 @@ export default function PurchaseHistory() {
     fetchPurchases();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-        <div className="animate-pulse space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-16 bg-gray-700 rounded" />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  // ... বাকি কোড
 
   return (
     <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
@@ -106,4 +91,4 @@ export default function PurchaseHistory() {
       )}
     </div>
   );
-}
+};

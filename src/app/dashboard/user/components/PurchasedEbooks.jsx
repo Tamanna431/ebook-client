@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { FaBook, FaDownload } from 'react-icons/fa';
+import api from '@/lib/axios';  // ✅
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { FaBook, FaDownload } from 'react-icons/fa';
 
 export default function PurchasedEbooks() {
   const [ebooks, setEbooks] = useState([]);
@@ -15,10 +13,7 @@ export default function PurchasedEbooks() {
   useEffect(() => {
     const fetchEbooks = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${API_URL}/users/me/purchased-ebooks`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.get('/api/users/me/purchased-ebooks');  // ✅
         setEbooks(response.data.data || []);
       } catch (error) {
         console.error('Error fetching purchased ebooks:', error);
@@ -29,16 +24,6 @@ export default function PurchasedEbooks() {
 
     fetchEbooks();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-gray-800 rounded-xl h-96 animate-pulse" />
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -93,4 +78,4 @@ export default function PurchasedEbooks() {
       )}
     </div>
   );
-}
+};

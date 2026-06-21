@@ -19,50 +19,64 @@ const Register = () => {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm();
 
   const password = watch('password');
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
-
-    // Check if passwords match
+    // ✅ Validation check
     if (data.password !== data.confirmPassword) {
       toast.error('Passwords do not match');
-      setIsSubmitting(false);
       return;
     }
 
-    // Prepare data for API
-    const userData = {
-      name: data.fullName,
-      email: data.email,
-      password: data.password,
-      role: selectedRole,
-    };
-
-    // Call register function from AuthContext
-    const result = await registerUser(userData);
-
-    // ✅ Login page এ ইমেইল পাঠিয়ে দিন (auto-fill করার জন্য)
-
-  
-    if (result && result.success) {
-      localStorage.setItem('registeredEmail', data.email);
+    if (!selectedRole) {
+      toast.error('Please select a role');
+      return;
     }
 
-    setIsSubmitting(false);
+    setIsSubmitting(true);
+
+    try {
+      const userData = {
+        name: data.fullName,
+        email: data.email,
+        password: data.password,
+        role: selectedRole, // ✅ Role পাঠানো হচ্ছে
+      };
+
+      console.log('📤 Registering user:', userData);
+
+      const result = await registerUser(userData);
+
+      if (result && result.success) {
+        localStorage.setItem('registeredEmail', data.email);
+        reset(); // ✅ Form reset
+      }
+    } catch (error) {
+      console.error('❌ Registration error:', error);
+      toast.error('Registration failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  //const handleGoogleLogin = () => {
-    //toast.success('Google login will be available soon!');
-   const handleGoogleLogin = () => {
-  // ✅ এভাবে লিখুন
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-  window.location.href = `${apiUrl}/api/auth/google`;
-};
-  //};
+  // ✅ Google Login with role
+  const handleGoogleLogin = (role) => {
+    try {
+      console.log(`🔔 Google login initiated for role: ${role}`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+      //const state = Buffer.from(JSON.stringify({ role })).toString('base64');
+       
+      window.location.href = `${apiUrl}/api/auth/google?role=${role}`;
+    } catch (error) {
+      console.error('❌ Google login error:', error);
+      toast.error('Google login failed. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 pt-24">
@@ -196,7 +210,7 @@ const Register = () => {
               )}
             </div>
 
-            {/* Role Selection - Fixed with state */}
+            {/* Role Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 I want to join as a
@@ -257,19 +271,31 @@ const Register = () => {
               <div className="w-full border-t border-gray-700"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-900 text-gray-400">Or continue with</span>
+              <span className="px-2 bg-gray-900 text-gray-400">Or continue with Google</span>
             </div>
           </div>
 
-          {/* Google Login */}
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            className="w-full py-3 px-4 border border-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"
-          >
-            <FaGoogle className="text-red-500" />
-            Sign up with Google
-          </button>
+          {/* Google Login Buttons */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => handleGoogleLogin('user')}
+              disabled={isSubmitting}
+              className="py-3 px-4 border border-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <FaGoogle className="text-red-500" />
+              <span className="text-sm">Reader</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGoogleLogin('writer')}
+              disabled={isSubmitting}
+              className="py-3 px-4 border border-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <FaGoogle className="text-red-500" />
+              <span className="text-sm">Writer</span>
+            </button>
+          </div>
 
           {/* Login Link */}
           <div className="text-center">

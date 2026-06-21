@@ -1,23 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import api from '@/lib/axios';  // ✅
+import api from '@/lib/axios';
+import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
-import {
- FaHeart,
- FaTrash
-} from 'react-icons/fa';
+import { FaHeart, FaTrash } from 'react-icons/fa';
 
-export default function Bookmarks() {
+export default function WriterBookmarks() {
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchBookmarks = async () => {
     try {
-      const response = await api.get('/api/users/me/bookmarks');  // ✅
-      setBookmarks(response.data.data || []);
+      const res = await api.get('/api/users/me/bookmarks');
+      setBookmarks(res.data.data || []);
     } catch (error) {
       console.error('Error fetching bookmarks:', error);
     } finally {
@@ -27,11 +24,10 @@ export default function Bookmarks() {
 
   const removeBookmark = async (ebookId) => {
     try {
-      await api.delete(`/api/users/bookmarks/${ebookId}`);  // ✅
-      setBookmarks(bookmarks.filter((ebook) => ebook._id !== ebookId));
+      await api.delete(`/api/users/bookmarks/${ebookId}`);
+      setBookmarks(bookmarks.filter((b) => b._id !== ebookId));
       toast.success('Bookmark removed');
     } catch (error) {
-      console.error('Error removing bookmark:', error);
       toast.error('Failed to remove bookmark');
     }
   };
@@ -54,7 +50,7 @@ export default function Bookmarks() {
     <div>
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
         <FaHeart className="text-red-400" />
-        Bookmarks
+        My Bookmarks
       </h2>
 
       {bookmarks.length === 0 ? (
@@ -63,7 +59,7 @@ export default function Bookmarks() {
           <p className="text-gray-400 text-lg">No bookmarks yet</p>
           <Link
             href="/browse"
-            className="inline-block mt-4 px-6 py-3 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-lg font-medium hover:from-violet-700 hover:to-blue-700 transition-all"
+            className="inline-block mt-4 px-6 py-3 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-lg font-medium"
           >
             Discover Ebooks
           </Link>
@@ -112,4 +108,4 @@ export default function Bookmarks() {
       )}
     </div>
   );
-};
+}

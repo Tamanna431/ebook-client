@@ -6,11 +6,10 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaBook, FaUser, FaTag, FaDollarSign, FaHeart, FaShoppingCart, FaArrowLeft, FaStar } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
-import axios from 'axios';
+import api from '@/lib/axios';  // ✅ এই লাইনটি যোগ করুন
 import toast from 'react-hot-toast';
-import stripePromise from '@/utils/stripe';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function EbookDetails() {
   const { id } = useParams();
@@ -25,12 +24,13 @@ export default function EbookDetails() {
   useEffect(() => {
     const fetchEbook = async () => {
       try {
-        const response = await axios.get(`${API_URL}/ebooks/${id}`);
+        // ✅ api ব্যবহার করুন
+        const response = await api.get(`/api/ebooks/${id}`);
         setEbook(response.data.data);
 
         // Fetch related ebooks (same genre)
-        const relatedResponse = await axios.get(
-          `${API_URL}/ebooks?genre=${response.data.data.genre}&limit=4`
+        const relatedResponse = await api.get(
+          `/api/ebooks?genre=${response.data.data.genre}&limit=4`
         );
         setRelatedEbooks(
           relatedResponse.data.data.filter((e) => e._id !== id).slice(0, 4)
@@ -47,7 +47,7 @@ export default function EbookDetails() {
     if (id) fetchEbook();
   }, [id, router]);
 
-  // ✅ Bookmark handler with real API call
+  // ✅ Bookmark handler
   const handleBookmark = async () => {
     if (!isAuthenticated) {
       toast.error('Please login to bookmark');
@@ -56,24 +56,13 @@ export default function EbookDetails() {
     }
 
     try {
-      const token = localStorage.getItem('token');
-
+      // ✅ api ব্যবহার করুন (token automatically যোগ হবে)
       if (isBookmarked) {
-        // Remove bookmark
-        await axios.delete(`${API_URL}/users/bookmarks/${ebook._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.delete(`/api/users/bookmarks/${ebook._id}`);
         setIsBookmarked(false);
         toast.success('Removed from bookmarks');
       } else {
-        // Add bookmark
-        await axios.post(
-          `${API_URL}/users/bookmarks/${ebook._id}`,
-          {},
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await api.post(`/api/users/bookmarks/${ebook._id}`);
         setIsBookmarked(true);
         toast.success('Added to bookmarks');
       }
@@ -85,42 +74,52 @@ export default function EbookDetails() {
 
   // ✅ Purchase handler with Stripe integration
   const handlePurchase = async () => {
-  if (!isAuthenticated) {
-    toast.error('Please login to purchase');
-    router.push('/login');
-    return;
-  }
-
-  if (!ebook.isAvailable) {
-    toast.error('This ebook is not available');
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem('token');
-    
-    // Create checkout session
-    const response = await axios.post(
-      `${API_URL}/payments/create-checkout`,
-      { ebookId: ebook._id },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    if (response.data.success) {
-      // ✅ Redirect to Stripe Checkout URL
-      if (response.data.url) {
-        window.location.href = response.data.url;
-      } else {
-        toast.error('Checkout URL not available');
-      }
+    if (!isAuthenticated) {
+      toast.error('Please login to purchase');
+      router.push('/login');
+      return;
     }
-  } catch (error) {
-    console.error('Purchase error:', error);
-    toast.error(error.response?.data?.message || 'Payment failed');
-  }
-};
+
+    if (!ebook.isAvailable) {
+      toast.error('This ebook is not available');
+      return;
+    }
+
+    try {
+      // ✅ api ব্যবহার করুন (token automatically যোগ হবে)
+      const response = await api.post('/api/payments/create-checkout', { 
+        ebookId: ebook._id 
+      });
+
+      if (response.data.success) {
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        } else {
+          toast.error('Checkout URL not available');
+        }
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      toast.error(error.response?.data?.message || 'Payment failed');
+    }
+  };
+
+  // Check bookmark status when user is logged in
+  useEffect(() => {
+    const checkBookmarkStatus = async () => {
+      if (!isAuthenticated || !ebook) return;
+
+      try {
+        // ✅ api ব্যবহার করুন
+        const response = await api.get(`/api/users/bookmarks/check/${ebook._id}`);
+        setIsBookmarked(response.data.data.isBookmarked);
+      } catch (error) {
+        console.error('Check bookmark error:', error);
+      }
+    };
+
+    checkBookmarkStatus();
+  }, [isAuthenticated, ebook]);
 
   if (loading) {
     return (

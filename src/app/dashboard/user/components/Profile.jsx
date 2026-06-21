@@ -1,15 +1,28 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { FaUser, FaEnvelope, FaCalendar } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaCalendar, FaShieldAlt } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 export default function Profile() {
   const { user } = useAuth();
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="bg-gray-800 rounded-xl p-12 text-center border border-gray-700">
+        <FaUser className="text-6xl text-gray-600 mx-auto mb-4" />
+        <p className="text-gray-400 text-lg">No profile data available</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-gray-800 rounded-xl p-6 border border-gray-700"
+    >
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
         <FaUser className="text-violet-400" />
         Profile Information
@@ -18,12 +31,23 @@ export default function Profile() {
       <div className="space-y-6">
         {/* Avatar */}
         <div className="flex items-center gap-6">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center text-4xl font-bold text-white">
-            {user.name?.charAt(0) || 'U'}
-          </div>
+          {user.avatar ? (
+            <img
+              src={user.avatar}
+              alt={user.name}
+              className="w-24 h-24 rounded-full object-cover border-4 border-violet-500"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center text-4xl font-bold text-white">
+              {user.name?.charAt(0) || 'U'}
+            </div>
+          )}
           <div>
             <h3 className="text-2xl font-bold text-white">{user.name}</h3>
-            <p className="text-gray-400 capitalize">{user.role}</p>
+            <p className="text-gray-400 capitalize flex items-center gap-2">
+              <FaShieldAlt className="text-violet-400" />
+              {user.role}
+            </p>
           </div>
         </div>
 
@@ -63,6 +87,6 @@ export default function Profile() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

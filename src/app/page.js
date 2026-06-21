@@ -7,7 +7,7 @@ import { FaBook, FaUsers, FaStar, FaArrowRight } from 'react-icons/fa';
 import axios from 'axios';
 import Hero from '@/components/Hero';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function Home() {
   const [featuredEbooks, setFeaturedEbooks] = useState([]);
@@ -18,11 +18,11 @@ export default function Home() {
     const fetchData = async () => {
       try {
         // Fetch latest 6 ebooks
-        const ebooksResponse = await axios.get(`${API_URL}/ebooks?limit=6`);
+        const ebooksResponse = await axios.get(`${API_URL}/api/ebooks?limit=6`);
         setFeaturedEbooks(ebooksResponse.data.data || []);
 
         // Fetch top writers
-        const writersResponse = await axios.get(`${API_URL}/users/top-writers`);
+        const writersResponse = await axios.get(`${API_URL}/api/users/top-writers`);
         setTopWriters(writersResponse.data.data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -47,7 +47,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - আপনার existing Hero component */}
+      {/* Hero Section */}
       <Hero />
 
       {/* Featured Ebooks Section */}
