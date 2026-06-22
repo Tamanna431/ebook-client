@@ -20,15 +20,10 @@ export default function EbookDetails() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Debug logs
-  console.log('🎯 EbookDetails rendering...');
-  console.log('📖 Ebook ID:', id);
-
   useEffect(() => {
     const fetchEbook = async () => {
       try {
         console.log('📡 Fetching ebook:', id);
-        console.log('🔗 API URL:', process.env.NEXT_PUBLIC_API_URL);
         
         const response = await api.get(`/api/ebooks/${id}`);
         console.log('✅ Ebook fetched:', response.data.data);
@@ -50,8 +45,6 @@ export default function EbookDetails() {
         
         setError(error.response?.data?.message || 'Failed to load ebook details');
         
-        // ❌ Redirect remove করা হয়েছে!
-        // শুধু 404 হলে redirect করুন
         if (error.response?.status === 404) {
           toast.error('Ebook not found');
           setTimeout(() => {
@@ -68,7 +61,7 @@ export default function EbookDetails() {
     if (id) fetchEbook();
   }, [id]);
 
-  // ✅ Bookmark handler
+  // Bookmark handler
   const handleBookmark = async () => {
     if (!isAuthenticated) {
       toast.error('Please login to bookmark');
@@ -92,7 +85,7 @@ export default function EbookDetails() {
     }
   };
 
-  // ✅ Purchase handler with Stripe integration
+  // Purchase handler with Stripe integration
   const handlePurchase = async () => {
     if (!isAuthenticated) {
       toast.error('Please login to purchase');
@@ -159,7 +152,6 @@ export default function EbookDetails() {
     );
   }
 
-  // ✅ Error state দেখান (redirect ছাড়া)
   if (error || !ebook) {
     return (
       <div className="min-h-screen bg-gray-900 pt-24 pb-12 flex items-center justify-center">
@@ -229,12 +221,10 @@ export default function EbookDetails() {
               <div className="flex items-center gap-2 text-gray-400">
                 <FaUser className="text-violet-400" />
                 <span>by </span>
-                <Link
-                  href={`/writers/${ebook.writer?._id}`}
-                  className="text-violet-400 hover:text-violet-300 font-medium"
-                >
+                {/* ✅ Writer name শুধু text হিসেবে দেখান (link ছাড়া) */}
+                <span className="text-violet-400 font-medium">
                   {ebook.writer?.name || 'Unknown Writer'}
-                </Link>
+                </span>
               </div>
             </div>
 
@@ -341,6 +331,7 @@ export default function EbookDetails() {
                       <h3 className="text-lg font-bold text-white mb-1 line-clamp-1">
                         {relatedEbook.title}
                       </h3>
+                      {/* ✅ Related ebooks এও writer name শুধু text */}
                       <p className="text-gray-400 text-sm mb-2">
                         by {relatedEbook.writer?.name || 'Unknown'}
                       </p>
