@@ -2,10 +2,23 @@
 
 import Link from 'next/link';
 import { FaBookOpen, FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
-import { footerLinks } from '@/utils/constants';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+
+  // ✅ শুধু working routes
+  const quickLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'Browse Ebooks', href: '/browse' },
+    { name: 'Dashboard', href: '/dashboard/user' },
+  ];
+
+  const socialLinks = [
+    { name: 'Facebook', href: 'https://facebook.com' },
+    { name: 'Twitter', href: 'https://twitter.com' },
+    { name: 'Instagram', href: 'https://instagram.com' },
+    { name: 'LinkedIn', href: 'https://linkedin.com' },
+  ];
 
   return (
     <footer className="bg-gray-900 border-t border-gray-800">
@@ -33,7 +46,7 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              {footerLinks.quickLinks.map((link) => (
+              {quickLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
@@ -46,14 +59,30 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Features */}
+          {/* Features - ✅ শুধু working routes */}
           <div>
             <h4 className="text-white font-semibold mb-4">Features</h4>
             <ul className="space-y-2">
-              <li><Link href="/browse" className="text-gray-400 hover:text-violet-400 transition-colors text-sm">Browse Ebooks</Link></li>
-              <li><Link href="/writers" className="text-gray-400 hover:text-violet-400 transition-colors text-sm">Top Writers</Link></li>
-              <li><Link href="/genres" className="text-gray-400 hover:text-violet-400 transition-colors text-sm">Genres</Link></li>
-              <li><Link href="/new-releases" className="text-gray-400 hover:text-violet-400 transition-colors text-sm">New Releases</Link></li>
+              <li>
+                <Link href="/browse" className="text-gray-400 hover:text-violet-400 transition-colors text-sm">
+                  Browse Ebooks
+                </Link>
+              </li>
+              <li>
+                <Link href="/browse?sort=popular" className="text-gray-400 hover:text-violet-400 transition-colors text-sm">
+                  Popular Ebooks
+                </Link>
+              </li>
+              <li>
+                <Link href="/browse?genre=Sci-Fi" className="text-gray-400 hover:text-violet-400 transition-colors text-sm">
+                  Sci-Fi Books
+                </Link>
+              </li>
+              <li>
+                <Link href="/browse?genre=Romance" className="text-gray-400 hover:text-violet-400 transition-colors text-sm">
+                  Romance Books
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -63,7 +92,7 @@ const Footer = () => {
             <p className="text-gray-400 text-sm mb-4">
               Subscribe to get updates on new ebooks and features.
             </p>
-            <form className="space-y-2">
+            <form className="space-y-2" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -89,10 +118,12 @@ const Footer = () => {
 
           {/* Social Media Icons */}
           <div className="flex items-center space-x-4">
-            {footerLinks.socialLinks.map((social) => (
-              <Link
+            {socialLinks.map((social) => (
+              <a
                 key={social.name}
                 href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-400 hover:text-violet-400 transition-colors"
                 aria-label={social.name}
               >
@@ -100,7 +131,7 @@ const Footer = () => {
                 {social.name === 'Twitter' && <FaTwitter size={20} />}
                 {social.name === 'Instagram' && <FaInstagram size={20} />}
                 {social.name === 'LinkedIn' && <FaLinkedin size={20} />}
-              </Link>
+              </a>
             ))}
           </div>
         </div>
