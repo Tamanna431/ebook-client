@@ -53,10 +53,16 @@ function BrowseContent() {
 
       const response = await api.get(`/api/ebooks?${params.toString()}`);
       
+      // ✅ Debug: Writer data চেক করুন
+      console.log('📚 Ebooks fetched:', response.data.data);
+      if (response.data.data && response.data.data.length > 0) {
+        console.log('👤 First ebook writer:', response.data.data[0].writer);
+      }
+      
       setEbooks(response.data.data || []);
       setPagination(response.data.pagination || { total: 0, page: 1, pages: 1 });
     } catch (error) {
-      console.error('Error fetching ebooks:', error);
+      console.error('❌ Error fetching ebooks:', error);
     } finally {
       setLoading(false);
     }
@@ -260,7 +266,9 @@ function BrowseContent() {
                   </div>
                   <div className="p-4">
                     <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{ebook.title}</h3>
-                    <p className="text-gray-400 text-sm mb-2">by {ebook.writer?.name || 'Unknown'}</p>
+                    <p className="text-gray-400 text-sm mb-2">
+                      by {ebook.writer?.name || 'Unknown'}
+                    </p>
                     <p className="text-gray-500 text-xs line-clamp-2 mb-3">{ebook.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs bg-blue-600/20 text-blue-400 px-2 py-1 rounded">
