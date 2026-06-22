@@ -6,10 +6,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaBook, FaUser, FaTag, FaDollarSign, FaHeart, FaShoppingCart, FaArrowLeft, FaStar } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
-import api from '@/lib/axios';  // ✅ এই লাইনটি যোগ করুন
+import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function EbookDetails() {
   const { id } = useParams();
@@ -20,13 +18,23 @@ export default function EbookDetails() {
   const [relatedEbooks, setRelatedEbooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [error, setError] = useState(null);
+
+  // ✅ Debug logs
+  console.log('🎯 EbookDetails rendering...');
+  console.log('📖 Ebook ID:', id);
 
   useEffect(() => {
     const fetchEbook = async () => {
       try {
-        // ✅ api ব্যবহার করুন
+        console.log('📡 Fetching ebook:', id);
+        console.log('🔗 API URL:', process.env.NEXT_PUBLIC_API_URL);
+        
         const response = await api.get(`/api/ebooks/${id}`);
+        console.log('✅ Ebook fetched:', response.data.data);
+        
         setEbook(response.data.data);
+        setError(null);
 
         // Fetch related ebooks (same genre)
         const relatedResponse = await api.get(
@@ -36,16 +44,29 @@ export default function EbookDetails() {
           relatedResponse.data.data.filter((e) => e._id !== id).slice(0, 4)
         );
       } catch (error) {
-        console.error('Error fetching ebook:', error);
-        toast.error('Ebook not found');
-        router.push('/browse');
+        console.error('❌ Error fetching ebook:', error);
+        console.error('❌ Error response:', error.response?.data);
+        console.error('❌ Error status:', error.response?.status);
+        
+        setError(error.response?.data?.message || 'Failed to load ebook details');
+        
+        // ❌ Redirect remove করা হয়েছে!
+        // শুধু 404 হলে redirect করুন
+        if (error.response?.status === 404) {
+          toast.error('Ebook not found');
+          setTimeout(() => {
+            router.push('/browse');
+          }, 2000);
+        } else {
+          toast.error('Failed to load ebook details');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     if (id) fetchEbook();
-  }, [id, router]);
+  }, [id]);
 
   // ✅ Bookmark handler
   const handleBookmark = async () => {
@@ -56,7 +77,6 @@ export default function EbookDetails() {
     }
 
     try {
-      // ✅ api ব্যবহার করুন (token automatically যোগ হবে)
       if (isBookmarked) {
         await api.delete(`/api/users/bookmarks/${ebook._id}`);
         setIsBookmarked(false);
@@ -86,7 +106,6 @@ export default function EbookDetails() {
     }
 
     try {
-      // ✅ api ব্যবহার করুন (token automatically যোগ হবে)
       const response = await api.post('/api/payments/create-checkout', { 
         ebookId: ebook._id 
       });
@@ -110,7 +129,6 @@ export default function EbookDetails() {
       if (!isAuthenticated || !ebook) return;
 
       try {
-        // ✅ api ব্যবহার করুন
         const response = await api.get(`/api/users/bookmarks/check/${ebook._id}`);
         setIsBookmarked(response.data.data.isBookmarked);
       } catch (error) {
@@ -141,12 +159,16 @@ export default function EbookDetails() {
     );
   }
 
-  if (!ebook) {
+  // ✅ Error state দেখান (redirect ছাড়া)
+  if (error || !ebook) {
     return (
       <div className="min-h-screen bg-gray-900 pt-24 pb-12 flex items-center justify-center">
         <div className="text-center">
           <FaBook className="text-6xl text-gray-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Ebook not found</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {error ? 'Error Loading Ebook' : 'Ebook not found'}
+          </h2>
+          <p className="text-gray-400 mb-4">{error || 'The ebook you are looking for does not exist.'}</p>
           <Link href="/browse" className="text-violet-400 hover:text-violet-300">
             ← Back to Browse
           </Link>
