@@ -59,7 +59,7 @@ export default function Home() {
             <h2 className="text-4xl font-bold bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent mb-4">
               Featured Ebooks
             </h2>
-            <p className="text-gray-400">Discover our latest and most popular ebooks</p>
+            <p className="text-gray-400">Discover our latest ebooks</p>
           </motion.div>
 
           {loading ? (
