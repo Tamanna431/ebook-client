@@ -3,8 +3,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import api from '@/lib/axios';  // ✅ axios এর বদলে api
+import api from '@/lib/axios';
 import Hero from '@/components/Hero';
+import { 
+  FaBook, FaUsers, FaStar, FaShoppingCart, FaDownload, 
+  FaCheckCircle, FaPen, FaShieldAlt, FaMobile 
+} from 'react-icons/fa';
 
 export default function Home() {
   const [featuredEbooks, setFeaturedEbooks] = useState([]);
@@ -14,11 +18,9 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ✅ api instance ব্যবহার করুন
         const ebooksResponse = await api.get('/api/ebooks/featured');
         setFeaturedEbooks(ebooksResponse.data.data || []);
 
-        // ✅ Top writers endpoint
         const writersResponse = await api.get('/api/users/top-writers');
         setTopWriters(writersResponse.data.data || []);
       } catch (error) {
@@ -42,11 +44,68 @@ export default function Home() {
     { name: 'Biography', icon: '📖', link: '/browse?genre=Biography' },
   ];
 
+  // ✅ NEW: Statistics Data
+  const stats = [
+    { value: '10K+', label: 'Ebooks Available', icon: <FaBook className="text-3xl" /> },
+    { value: '5K+', label: 'Active Readers', icon: <FaUsers className="text-3xl" /> },
+    { value: '500+', label: 'Talented Writers', icon: <FaPen className="text-3xl" /> },
+    { value: '50K+', label: 'Books Sold', icon: <FaShoppingCart className="text-3xl" /> },
+  ];
+
+  // ✅ NEW: How It Works Data
+  const steps = [
+    {
+      icon: <FaBook className="text-4xl text-violet-400" />,
+      title: 'Browse & Discover',
+      description: 'Explore thousands of original ebooks across multiple genres from talented writers.',
+    },
+    {
+      icon: <FaShoppingCart className="text-4xl text-blue-400" />,
+      title: 'Secure Purchase',
+      description: 'Buy your favorite ebooks securely using our Stripe-powered checkout system.',
+    },
+    {
+      icon: <FaDownload className="text-4xl text-emerald-400" />,
+      title: 'Read Anywhere',
+      description: 'Get instant access and read your ebooks on any device, anytime you want.',
+    },
+  ];
+
+  // ✅ NEW: Why Choose Us Data
+  const features = [
+    { icon: <FaShieldAlt className="text-3xl text-violet-400" />, title: '100% Secure Payments', desc: 'Industry-standard encryption for all transactions.' },
+    { icon: <FaMobile className="text-3xl text-blue-400" />, title: 'Mobile Friendly', desc: 'Seamless reading experience on phones and tablets.' },
+    { icon: <FaCheckCircle className="text-3xl text-emerald-400" />, title: 'Support Independent Writers', desc: 'Every purchase directly empowers creators.' },
+  ];
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-900">
+      {/* 1. Hero Section (Existing) */}
       <Hero />
 
-      {/* Featured Ebooks Section */}
+      {/* 2. NEW: Statistics Section */}
+      <section className="py-16 bg-gray-800/50 border-y border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="text-center"
+              >
+                <div className="flex justify-center mb-3 text-violet-400">{stat.icon}</div>
+                <div className="text-3xl md:text-4xl font-bold text-white mb-1">{stat.value}</div>
+                <div className="text-gray-400 text-sm">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Featured Ebooks Section (Existing) */}
       <section className="py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -59,7 +118,7 @@ export default function Home() {
             <h2 className="text-4xl font-bold bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent mb-4">
               Featured Ebooks
             </h2>
-            <p className="text-gray-400">Discover our latest ebooks</p>
+            <p className="text-gray-400">Discover our latest and most popular ebooks</p>
           </motion.div>
 
           {loading ? (
@@ -114,11 +173,54 @@ export default function Home() {
               <p className="text-gray-400 text-xl">No ebooks available yet. Check back soon!</p>
             </div>
           )}
+          
+          <div className="text-center mt-12">
+            <Link href="/browse" className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 border border-gray-700 text-white rounded-full hover:bg-gray-700 transition-all">
+              View All Ebooks <FaStar className="text-sm" />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Top Writers Section */}
-      <section className="py-20 bg-gray-800/50">
+      {/* 4. NEW: How It Works Section */}
+      <section className="py-20 bg-gray-800/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent mb-4">
+              How It Works
+            </h2>
+            <p className="text-gray-400">Get started in three simple steps</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {steps.map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+                viewport={{ once: true }}
+                className="bg-gray-800 rounded-2xl p-8 text-center border border-gray-700 hover:border-violet-500 transition-all duration-300 relative"
+              >
+                <div className="absolute -top-4 -right-4 w-10 h-10 bg-gradient-to-br from-violet-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                  {index + 1}
+                </div>
+                <div className="mb-6 flex justify-center">{step.icon}</div>
+                <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
+                <p className="text-gray-400 leading-relaxed">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Top Writers Section (Existing) */}
+      <section className="py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -143,7 +245,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {topWriters.map((writer, index) => (
                 <motion.div
-                  key={writer._id}
+                  key={writer._id || index}
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
@@ -163,8 +265,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Genres Section */}
-      <section className="py-20 bg-gray-900">
+      {/* 6. Genres Section (Existing) */}
+      <section className="py-20 bg-gray-800/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -199,6 +301,75 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* 7. NEW: Why Choose Us Section */}
+      <section className="py-20 bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent mb-4">
+              Why Choose Fable
+            </h2>
+            <p className="text-gray-400">The best platform for both readers and writers</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-violet-500 transition-all duration-300"
+              >
+                <div className="mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
+                <p className="text-gray-400">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 8. NEW: Call to Action (Become a Writer) */}
+      <section className="py-20 bg-gradient-to-r from-violet-900/50 to-blue-900/50 border-y border-gray-800">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <FaPen className="text-5xl text-violet-400 mb-6 mx-auto" />
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Ready to Share Your Story?
+            </h2>
+            <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+              Join thousands of writers who publish and sell their ebooks on Fable. 
+              Start earning from your passion and reach readers worldwide today.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/register" 
+                className="px-8 py-4 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-full font-semibold hover:from-violet-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-violet-500/50"
+              >
+                Start Publishing Now
+              </Link>
+              <Link
+                href="/browse"
+                className="px-8 py-4 bg-gray-800 border border-gray-700 text-white rounded-full font-semibold hover:bg-gray-700 transition-all"
+              >
+                Explore Ebooks
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>
