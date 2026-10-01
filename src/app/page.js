@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import api from '@/lib/axios';
 import Hero from '@/components/Hero';
-import { 
-  FaBook, FaUsers, FaStar, FaShoppingCart, FaDownload, 
-  FaCheckCircle, FaPen, FaShieldAlt, FaMobile 
+import {
+  FaBook, FaUsers, FaStar, FaShoppingCart, FaDownload,
+  FaCheckCircle, FaPen, FaShieldAlt, FaMobile
 } from 'react-icons/fa';
 
 export default function Home() {
@@ -83,28 +83,6 @@ export default function Home() {
       {/* 1. Hero Section (Existing) */}
       <Hero />
 
-      {/* 2. NEW: Statistics Section */}
-      <section className="py-16 bg-gray-800/50 border-y border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <div className="flex justify-center mb-3 text-violet-400">{stat.icon}</div>
-                <div className="text-3xl md:text-4xl font-bold text-white mb-1">{stat.value}</div>
-                <div className="text-gray-400 text-sm">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* 3. Featured Ebooks Section (Existing) */}
       <section className="py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -173,7 +151,7 @@ export default function Home() {
               <p className="text-gray-400 text-xl">No ebooks available yet. Check back soon!</p>
             </div>
           )}
-          
+
           <div className="text-center mt-12">
             <Link href="/browse" className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 border border-gray-700 text-white rounded-full hover:bg-gray-700 transition-all">
               View All Ebooks <FaStar className="text-sm" />
@@ -352,12 +330,12 @@ export default function Home() {
               Ready to Share Your Story?
             </h2>
             <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
-              Join thousands of writers who publish and sell their ebooks on Fable. 
+              Join thousands of writers who publish and sell their ebooks on Fable.
               Start earning from your passion and reach readers worldwide today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/register" 
+                href="/register"
                 className="px-8 py-4 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-full font-semibold hover:from-violet-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-violet-500/50"
               >
                 Start Publishing Now
