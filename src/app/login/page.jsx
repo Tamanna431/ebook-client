@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaEnvelope, FaLock, FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaGoogle, FaEye, FaEyeSlash, FaUserShield } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -24,6 +24,11 @@ function LoginForm() {
     if (error) {
       toast.error('Authentication failed. Please try again.');
     }
+    const registeredEmail = localStorage.getItem('registeredEmail');
+    if (registeredEmail) {
+      setFormData((prev) => ({ ...prev, email: registeredEmail }));
+      localStorage.removeItem('registeredEmail');
+    }
   }, [searchParams]);
 
   const handleSubmit = async (e) => {
@@ -39,22 +44,25 @@ function LoginForm() {
     }
   };
 
-  /*const handleGoogleLogin = () => {
+  const handleDemoAdminLogin = async () => {
+    const demoData = { email: 'admin@fable.com', password: 'admin123' };
+    setFormData(demoData);
+    setLoading(true);
+
     try {
-      console.log('🔔 Google login initiated');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      window.location.href = `${apiUrl}/api/auth/google`;
+      await login(demoData);
     } catch (error) {
-      console.error('❌ Google login error:', error);
-      toast.error('Google login failed. Please try again.');
+      console.error('Demo admin login error:', error);
+    } finally {
+      setLoading(false);
     }
   };
-  */
- const handleGoogleLogin = (role) => {
-  console.log(`🔔 Google login initiated for role: ${role}`);
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-  window.location.href = `${apiUrl}/api/auth/google?role=${role}`;
-};
+
+  const handleGoogleLogin = (role) => {
+    console.log(`🔔 Google login initiated for role: ${role}`);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    window.location.href = `${apiUrl}/api/auth/google?role=${role}`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 pt-24 pb-12 flex items-center justify-center">
@@ -105,7 +113,7 @@ function LoginForm() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 transition-colors"
-                  placeholder=" "
+                  placeholder="••••••••"
                   required
                 />
                 <button
@@ -140,6 +148,41 @@ function LoginForm() {
               )}
             </button>
           </form>
+
+          {/* Demo Admin Login */}
+          <div className="mt-6 pt-5 border-t border-gray-700/80">
+            <div className="bg-gray-700/40 border border-violet-500/30 rounded-xl p-4">
+              <div className="flex items-center justify-between gap-3 mb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center">
+                    <FaUserShield className="text-base" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">Demo Admin Account</h3>
+                    <p className="text-xs text-gray-400">One-click login for evaluation</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDemoAdminLogin}
+                  disabled={loading}
+                  className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white transition-all shadow-md hover:shadow-violet-500/20 disabled:opacity-50 cursor-pointer"
+                >
+                  Login as Admin
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs bg-gray-900/70 p-2.5 rounded-lg border border-gray-700/60 font-mono text-gray-300">
+                <div>
+                  <span className="text-gray-500 block text-[11px] font-sans">Email:</span>
+                  admin@fable.com
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-[11px] font-sans">Password:</span>
+                  admin123
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">

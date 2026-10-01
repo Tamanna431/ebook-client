@@ -22,23 +22,21 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    axios.defaults.baseURL = `${API_URL}/api`;
-
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token') || localStorage.getItem('fable_token');
+    const storedUser = localStorage.getItem('user') || localStorage.getItem('fable_user');
 
     if (token) {
-      axios.defaults.headers.common[
-        'Authorization'
-      ] = `Bearer ${token}`;
-      
-      // কাস্টম api ইনস্ট্যান্সেও হেডার সেট করে দেওয়া নিরাপদ
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
 
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
+      try {
+        setUser(JSON.parse(storedUser));
+        setIsAuthenticated(true);
+      } catch (e) {
+        console.error('Failed to parse stored user:', e);
+      }
     }
     
     setLoading(false);
@@ -52,9 +50,10 @@ export const AuthProvider = ({ children }) => {
         const { token, user: userData } = response.data;
 
         localStorage.setItem('token', token);
+        localStorage.setItem('fable_token', token);
         localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('fable_user', JSON.stringify(userData));
 
-        // টোকেন পাওয়ার পর এক্সিওস হেডার আপডেট
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
@@ -64,18 +63,27 @@ export const AuthProvider = ({ children }) => {
         toast.success('Registration successful!');
 
         setTimeout(() => {
-          if (userData.role === 'writer') {
-            router.push('/login');
+          if (userData.role === 'admin') {
+            router.push('/dashboard/admin');
+          } else if (userData.role === 'writer') {
+            router.push('/dashboard/writer');
           } else {
-            router.push('/login');
+            router.push('/dashboard/user');
           }
         }, 500);
 
         return { success: true };
       }
+      const message = response.data?.message || 'Registration failed';
+      toast.error(message);
+      return { success: false, message };
     } catch (error) {
       console.error('❌ Register error:', error.response?.data || error.message);
-      const message = error.response?.data?.message || 'Registration failed';
+      const message =
+        error.response?.data?.message ||
+        (typeof error.response?.data === 'string' ? 'Server error during registration' : null) ||
+        error.message ||
+        'Registration failed';
       toast.error(message);
       return { success: false, message };
     }
@@ -89,12 +97,12 @@ export const AuthProvider = ({ children }) => {
         const { token, user: userData } = response.data;
 
         console.log('🔐 Login success:', userData);
-        console.log('🔑 Token:', token);
 
         localStorage.setItem('token', token);
+        localStorage.setItem('fable_token', token);
         localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('fable_user', JSON.stringify(userData));
 
-        // টোকেন পাওয়ার পর এক্সিওস হেডার আপডেট
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
@@ -115,9 +123,12 @@ export const AuthProvider = ({ children }) => {
 
         return { success: true };
       }
+      const message = response.data?.message || 'Login failed';
+      toast.error(message);
+      return { success: false, message };
     } catch (error) {
       console.error('❌ Login error:', error.response?.data || error.message);
-      const message = error.response?.data?.message || 'Login failed';
+      const message = error.response?.data?.message || error.message || 'Login failed';
       toast.error(message);
       return { success: false, message };
     }
@@ -125,9 +136,10 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('fable_token');
     localStorage.removeItem('user');
+    localStorage.removeItem('fable_user');
     
-    // হেডার থেকে টোকেন রিমুভ করা
     delete axios.defaults.headers.common['Authorization'];
     delete api.defaults.headers.common['Authorization'];
 
