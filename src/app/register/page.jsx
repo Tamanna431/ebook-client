@@ -64,14 +64,12 @@ const Register = () => {
   };
 
   // ✅ Google Login with role
-  const handleGoogleLogin = (role) => {
+  const handleGoogleLogin = (role = 'user') => {
     try {
-      console.log(`🔔 Google login initiated for role: ${role}`);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-      //const state = Buffer.from(JSON.stringify({ role })).toString('base64');
-       
-      window.location.href = `${apiUrl}/api/auth/google?role=${role}`;
+      const selectedRole = typeof role === 'string' && ['user', 'writer', 'admin'].includes(role) ? role : 'user';
+      console.log(`🔔 Google login initiated for role: ${selectedRole}`);
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+      window.location.href = `${apiUrl}/api/auth/google?role=${selectedRole}`;
     } catch (error) {
       console.error('❌ Google login error:', error);
       toast.error('Google login failed. Please try again.');
